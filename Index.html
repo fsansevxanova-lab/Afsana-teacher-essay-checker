@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Əfsanə Müəllim - Esse Yoxlama Sistemi</title>
+    <!-- Bootstrap CSS (Gözəl dizayn üçün) -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .btn-primary { background-color: #4e73df; border: none; }
+        .btn-primary:hover { background-color: #2e59d9; }
+        .badge-custom { background-color: #e8f0fe; color: #1967d2; }
+    </style>
+</head>
+<body>
+
+<div class="container my-5">
+    <!-- Müəllif və Başlıq Hissəsi -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-dark">Esse Qiymətləndirmə Sistemi</h1>
+        <p class="text-muted fs-5">Müəllim <strong class="text-primary">Əfsanə xanım</strong> tərəfindən şagirdlər üçün hazırlanmışdır</p>
+        <span class="badge badge-custom p-2 fs-6">9 və 11-ci Sinif DİM Standartları</span>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card p-4 mb-4">
+                <!-- Seçimlər -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Sinif Seçin:</label>
+                        <select id="classSelect" class="form-select">
+                            <option value="9">9-cu sinif (Buraxılış imtahanı)</option>
+                            <option value="11">11-ci sinif (Buraxılış imtahanı)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">OpenAI API Açarınız:</label>
+                        <input type="password" id="apiKeyInput" class="form-control" placeholder="sk-...">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Esse Mövzusu:</label>
+                    <input type="text" id="topicInput" class="form-control" placeholder="Məsələn: The advantages of technology">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Essenizi bura daxil edin:</label>
+                    <textarea id="essayText" class="form-control" rows="10" placeholder="Essenizi yazın və ya bura yapışdırın..."></textarea>
+                </div>
+
+                <button onclick="checkEssay()" id="submitBtn" class="btn btn-primary w-100 p-2 fs-5 fw-bold">Esseniti Yoxla</button>
+            </div>
+
+            <!-- Nəticə Hissəsi -->
+            <div id="resultCard" class="card p-4 d-none">
+                <h3 class="text-success mb-3 fw-bold">Yoxlama Nəticəsi:</h3>
+                <div id="resultContent" style="white-space: pre-line;" class="fs-6 text-dark"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function checkEssay() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const classLevel = document.getElementById('classSelect').value;
+    const topic = document.getElementById('topicInput').value.trim();
+    const essay = document.getElementById('essayText').value.trim();
+    const submitBtn = document.getElementById('submitBtn');
+    const resultCard = document.getElementById('resultCard');
+    const resultContent = document.getElementById('resultContent');
+
+    if (!apiKey) { alert('Zəhmət olmasa OpenAI API açarını daxil edin!'); return; }
+    if (!topic || !essay) { alert('Mövzu və esse xanaları boş buraxıla bilməz!'); return; }
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Esse analiz edilir, zəhmət olmasa gözləyin...';
+    resultCard.classList.add('d-none');
+
+    const promptText = `Sən Azərbaycan DİM standartlarına uyğun ingilis dili üzrə esse yoxlayan ekspertsən. Bu tətbiq Əfsanə Müəllim tərəfindən hazırlanıb.
+    Şagirdin sinfi: ${classLevel}-cu sinif.
+    Essenin mövzusu: ${topic}
+    Şagirdin essesi: ${essay}
+    
+    Zəhmət olmasa esseni DİM-in 4 əsas meyarı (Məzmun, Struktur/Bağlılıq, Söz ehtiyatı, Qrammatika) üzrə ciddi yoxla. Hər meyar üzrə səhvləri və çatışmazlıqları Azərbaycan dilində ətraflı göstər, sonda ümumi balla və essenin daha mükəmməl (təkmilləşdirilmiş) variantını ingilis dilində nümunə olaraq yaz. Şagirdə motivasiya ver.`;
+
+    try {
+        const response = await fetch('https://openai.com', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'user', content: promptText }],
+                temperature: 0.7
+            })
+        });
+
+        const data = await response.json();
+        if (data.choices && data.choices[0]) {
+            resultContent.innerText = data.choices[0].message.content;
+            resultCard.classList.remove('d-none');
+        } else {
+            alert('Xəta baş verdi. API açarınızı və ya balansınızı yoxlayın.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Sistemə bağlanmaq mümkün olmadı.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Esseniti Yoxla';
+    }
+}
+</script>
+
+</body>
+</html>
