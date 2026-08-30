@@ -1,122 +1,81 @@
-
 <!DOCTYPE html>
 <html lang="az">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Əfsanə Teacher – Esse Yoxlama Sistemi</title>
+<title>Afsana Teacher Essay Checker</title>
 
 <style>
-*{box-sizing:border-box}
-
 body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:linear-gradient(135deg,#eef4ff,#f8fbff);
-    color:#172033;
+  font-family:Arial,sans-serif;
+  background:#f4f6fb;
+  margin:0;
+  padding:20px;
 }
 
 .container{
-    max-width:850px;
-    margin:30px auto;
-    padding:20px;
-}
-
-.card{
-    background:white;
-    border-radius:20px;
-    padding:28px;
-    box-shadow:0 8px 30px rgba(0,0,0,.08);
+  max-width:800px;
+  margin:auto;
+  background:white;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 4px 20px #ccc;
 }
 
 h1{
-    text-align:center;
-    color:#3157d5;
-    margin-bottom:8px;
-}
-
-.subtitle{
-    text-align:center;
-    color:#667085;
-    margin-bottom:25px;
-}
-
-label{
-    display:block;
-    font-weight:bold;
-    margin:15px 0 7px;
-}
-
-select,textarea,input{
-    width:100%;
-    padding:13px;
-    border:1px solid #d5dbea;
-    border-radius:10px;
-    font-size:16px;
+  text-align:center;
+  color:#333;
 }
 
 textarea{
-    min-height:250px;
-    resize:vertical;
+  width:100%;
+  min-height:250px;
+  padding:15px;
+  font-size:16px;
+  border:1px solid #ccc;
+  border-radius:12px;
+  box-sizing:border-box;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0 15px;
+  box-sizing:border-box;
+  border:1px solid #ccc;
+  border-radius:10px;
 }
 
 button{
-    width:100%;
-    margin-top:20px;
-    padding:15px;
-    border:0;
-    border-radius:12px;
-    background:#3157d5;
-    color:white;
-    font-size:17px;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-button:disabled{
-    opacity:.6;
-    cursor:not-allowed;
-}
-
-#status{
-    margin-top:18px;
-    text-align:center;
-    font-weight:bold;
+  width:100%;
+  padding:15px;
+  border:0;
+  border-radius:12px;
+  background:#333;
+  color:white;
+  font-size:18px;
+  cursor:pointer;
 }
 
 .result{
-    display:none;
-    margin-top:25px;
-    padding:20px;
-    border-radius:15px;
-    background:#f5f8ff;
+  margin-top:20px;
+}
+
+.card{
+  background:#f7f7f7;
+  padding:15px;
+  margin:10px 0;
+  border-radius:12px;
 }
 
 .score{
-    font-size:32px;
-    font-weight:bold;
-    text-align:center;
-    color:#3157d5;
-}
-
-.result h3{
-    margin-bottom:6px;
+  font-size:28px;
+  font-weight:bold;
+  text-align:center;
 }
 
 .error{
-    color:#c62828;
-}
-
-.success{
-    color:#16803c;
-}
-
-.footer{
-    text-align:center;
-    margin-top:20px;
-    color:#777;
-    font-size:13px;
+  color:#b00020;
 }
 </style>
 </head>
@@ -125,207 +84,262 @@ button:disabled{
 
 <div class="container">
 
-<div class="card">
+<h1>📚 Afsana Teacher<br>Essay Checker</h1>
 
-<h1>Əfsanə Teacher</h1>
+<label>Essay mövzusu:</label>
+<input id="topic" placeholder="Mövzunu yazın">
 
-<div class="subtitle">
-Esse Yoxlama Sistemi
-</div>
+<label>Esse:</label>
+<textarea id="essay" placeholder="Esseni buraya yazın..."></textarea>
 
-<label for="grade">Sinif</label>
+<br><br>
 
-<select id="grade">
-<option value="11">11-ci sinif – Opinion Essay</option>
-<option value="9">9-cu sinif – Picture Description</option>
-</select>
+<button onclick="checkEssay()">ESSENİ YOXLAT</button>
 
-<label for="topic">Mövzu</label>
+<div id="result" class="result"></div>
 
-<input
-id="topic"
-type="text"
-placeholder="Mövzunu yazın"
->
-
-<label for="essay">Esseni daxil edin</label>
-
-<textarea
-id="essay"
-placeholder="Esseni buraya yazın..."
-></textarea>
-
-<button id="checkBtn">
-Esseni yoxla
-</button>
-
-<div id="status"></div>
-
-<div id="result" class="result">
-
-<div class="score" id="score"></div>
-
-<h3>Ümumi qiymətləndirmə</h3>
-<p id="overall"></p>
-
-<h3>Grammar</h3>
-<p id="grammar"></p>
-
-<h3>Vocabulary</h3>
-<p id="vocabulary"></p>
-
-<h3>Content</h3>
-<p id="content"></p>
-
-<h3>Organization</h3>
-<p id="organization"></p>
-
-<h3>Səhvlər və düzəlişlər</h3>
-<p id="corrections"></p>
-
-<h3>Məsləhət</h3>
-<p id="advice"></p>
-
-</div>
-
-<div class="footer">
-© Əfsanə Teacher
-</div>
-
-</div>
 </div>
 
 <script>
 
-const WORKER_URL =
-const WORKER_URL =
-"https://afsanaessaychecker.fsansevxanova.workers.dev";
+function checkEssay(){
 
-const button =
-document.getElementById("checkBtn");
-
-button.addEventListener("click", async () => {
-
-const grade =
-document.getElementById("grade").value;
-
-const topic =
-document.getElementById("topic").value.trim();
-
-const essay =
-document.getElementById("essay").value.trim();
-
-const status =
-document.getElementById("status");
-
-const result =
-document.getElementById("result");
+const essay=document.getElementById("essay").value.trim();
+const topic=document.getElementById("topic").value.trim();
+const result=document.getElementById("result");
 
 if(!essay){
-
-status.className="error";
-status.textContent="Zəhmət olmasa esseni daxil edin.";
+result.innerHTML='<p class="error">Zəhmət olmasa esse yazın.</p>';
 return;
-
 }
 
-if(WORKER_URL.includes("SENIN-WORKER-LINKIN")){
+const words=essay.split(/\s+/).filter(Boolean);
+const wordCount=words.length;
 
-status.className="error";
-status.textContent=
-"Əvvəlcə Worker linkini kodda dəyişmək lazımdır.";
-return;
+const text=essay.toLowerCase();
 
+let grammar=5;
+let vocabulary=5;
+let structure=5;
+let topicScore=5;
+
+let grammarMistakes=[];
+let suggestions=[];
+
+/* Sadə grammar yoxlaması */
+
+const grammarRules=[
+["i is","I am"],
+["he are","he is"],
+["she are","she is"],
+["they is","they are"],
+["we is","we are"],
+["you is","you are"],
+["he have","he has"],
+["she have","she has"],
+["did went","did go"],
+["did saw","did see"],
+["more better","better"],
+["people is","people are"],
+["children is","children are"]
+];
+
+grammarRules.forEach(function(item){
+
+if(text.includes(item[0])){
+grammar--;
+grammarMistakes.push(
+item[0]+" → "+item[1]
+);
 }
-
-button.disabled=true;
-status.className="";
-status.textContent="Esse yoxlanılır...";
-
-result.style.display="none";
-
-try{
-
-const response = await fetch(WORKER_URL,{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-grade:grade,
-topic:topic,
-essay:essay
-
-})
 
 });
 
-if(!response.ok){
+grammar=Math.max(0,grammar);
 
-throw new Error("Server xətası");
+/* Vocabulary */
 
-}
+const repeatedWords={};
 
-const data =
-await response.json();
+words.forEach(function(word){
 
-if(data.error){
+const w=word.toLowerCase().replace(/[^a-z']/g,"");
 
-throw new Error(data.error);
-
-}
-
-document.getElementById("score").textContent =
-data.score + " / 20";
-
-document.getElementById("overall").textContent =
-data.overall || "";
-
-document.getElementById("grammar").textContent =
-data.grammar || "";
-
-document.getElementById("vocabulary").textContent =
-data.vocabulary || "";
-
-document.getElementById("content").textContent =
-data.content || "";
-
-document.getElementById("organization").textContent =
-data.organization || "";
-
-document.getElementById("corrections").textContent =
-data.corrections || "";
-
-document.getElementById("advice").textContent =
-data.advice || "";
-
-result.style.display="block";
-
-status.className="success";
-status.textContent="Esse uğurla yoxlanıldı.";
-
-}catch(error){
-
-console.error(error);
-
-status.className="error";
-
-status.textContent=
-"Xəta baş verdi. Bir neçə saniyə sonra yenidən cəhd edin.";
-
-}finally{
-
-button.disabled=false;
-
+if(w.length>3){
+repeatedWords[w]=(repeatedWords[w]||0)+1;
 }
 
 });
+
+let repeated=[];
+
+for(let word in repeatedWords){
+
+if(repeatedWords[word]>=4){
+repeated.push(word);
+}
+
+}
+
+if(repeated.length>0){
+vocabulary-=Math.min(2,repeated.length);
+suggestions.push(
+"Bu sözləri çox təkrar etməməyə çalış: "+
+repeated.join(", ")
+);
+}
+
+vocabulary=Math.max(0,vocabulary);
+
+/* Structure */
+
+const sentences=essay
+.split(/[.!?]+/)
+.filter(function(x){return x.trim().length>0;});
+
+if(sentences.length<4){
+structure-=2;
+}
+
+if(wordCount<80){
+structure-=1;
+}
+
+if(wordCount<100){
+structure-=1;
+}
+
+structure=Math.max(0,structure);
+
+/* Topic */
+
+if(topic){
+
+const topicWords=topic
+.toLowerCase()
+.split(/\s+/)
+.filter(function(x){return x.length>3;});
+
+let found=0;
+
+topicWords.forEach(function(word){
+
+if(text.includes(word)){
+found++;
+}
+
+});
+
+if(topicWords.length>0){
+
+const ratio=found/topicWords.length;
+
+if(ratio<0.2){
+topicScore=2;
+}else if(ratio<0.4){
+topicScore=3;
+}else if(ratio<0.6){
+topicScore=4;
+}
+
+}
+
+}
+
+/* Nəticə */
+
+const raw=
+grammar+
+vocabulary+
+structure+
+topicScore;
+
+const finalScore=(raw/20)*16.70;
+
+let comment="";
+
+if(finalScore>=14){
+comment="Çox yaxşı nəticə. Əsasən yaxşı yazılıb.";
+}
+else if(finalScore>=11){
+comment="Yaxşıdır, amma bəzi səhvlər üzərində işləmək lazımdır.";
+}
+else if(finalScore>=8){
+comment="Orta nəticədir. Grammar və Vocabulary üzərində daha çox işləmək lazımdır.";
+}
+else{
+comment="Esse üzərində daha çox işləmək lazımdır.";
+}
+
+/* Ekrana çıxar */
+
+let html="";
+
+html+=
+'<div class="card score">'+
+finalScore.toFixed(2)+
+' / 16.70</div>';
+
+html+=
+'<div class="card"><b>Söz sayı:</b> '+
+wordCount+
+'</div>';
+
+html+=
+'<div class="card"><b>Mövzu:</b> '+
+topicScore+
+' / 5</div>';
+
+html+=
+'<div class="card"><b>Grammar:</b> '+
+grammar+
+' / 5</div>';
+
+html+=
+'<div class="card"><b>Vocabulary:</b> '+
+vocabulary+
+' / 5</div>';
+
+html+=
+'<div class="card"><b>Structure:</b> '+
+structure+
+' / 5</div>';
+
+html+=
+'<div class="card"><b>Müəllim rəyi:</b><br>'+
+comment+
+'</div>';
+
+if(grammarMistakes.length){
+
+html+=
+'<div class="card"><b>Grammar səhvləri:</b><br>'+
+grammarMistakes.join("<br>")+
+'</div>';
+
+}else{
+
+html+=
+'<div class="card"><b>Grammar:</b><br>'+
+"Aşkar edilən əsas grammar səhvi yoxdur."+
+'</div>';
+
+}
+
+if(suggestions.length){
+
+html+=
+'<div class="card"><b>Vocabulary tövsiyəsi:</b><br>'+
+suggestions.join("<br>")+
+'</div>';
+
+}
+
+result.innerHTML=html;
+
+}
 
 </script>
 
 </body>
-</html>
+    </html>
