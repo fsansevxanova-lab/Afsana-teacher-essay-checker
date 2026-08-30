@@ -3,343 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Afsana Teacher Essay Checker</title>
+<title>Afsana Teacher - Essay Checker</title>
 
 <style>
+*{box-sizing:border-box}
 body{
-  font-family:Arial,sans-serif;
-  background:#f4f6fb;
   margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#eef2ff,#f8fafc);
+  color:#172033;
+}
+.container{
+  max-width:900px;
+  margin:30px auto;
   padding:20px;
 }
-
-.container{
-  max-width:800px;
-  margin:auto;
+.card{
   background:white;
+  border-radius:22px;
   padding:25px;
-  border-radius:18px;
-  box-shadow:0 4px 20px #ccc;
+  box-shadow:0 10px 35px rgba(0,0,0,.10);
 }
-
 h1{
   text-align:center;
-  color:#333;
+  color:#4f46e5;
+  margin-bottom:5px;
 }
-
-textarea{
+.subtitle{
+  text-align:center;
+  color:#667085;
+  margin-bottom:25px;
+}
+label{
+  display:block;
+  font-weight:bold;
+  margin:15px 0 7px;
+}
+input,textarea,select{
   width:100%;
-  min-height:250px;
-  padding:15px;
-  font-size:16px;
-  border:1px solid #ccc;
+  padding:13px;
+  border:1px solid #d0d5dd;
   border-radius:12px;
-  box-sizing:border-box;
+  font-size:16px;
 }
-
-input{
-  width:100%;
-  padding:12px;
-  margin:8px 0 15px;
-  box-sizing:border-box;
-  border:1px solid #ccc;
-  border-radius:10px;
+textarea{
+  min-height:280px;
+  resize:vertical;
 }
-
 button{
   width:100%;
+  margin-top:18px;
   padding:15px;
   border:0;
   border-radius:12px;
-  background:#333;
+  background:#4f46e5;
   color:white;
   font-size:18px;
+  font-weight:bold;
   cursor:pointer;
 }
-
+button:hover{background:#3730a3}
 .result{
-  margin-top:20px;
+  display:none;
+  margin-top:25px;
 }
-
-.card{
-  background:#f7f7f7;
-  padding:15px;
-  margin:10px 0;
-  border-radius:12px;
-}
-
 .score{
-  font-size:28px;
-  font-weight:bold;
   text-align:center;
+  background:#eef2ff;
+  padding:20px;
+  border-radius:15px;
 }
-
-.error{
-  color:#b00020;
+.score-number{
+  font-size:45px;
+  font-weight:bold;
+  color:#4f46e5;
 }
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>📚 Afsana Teacher<br>Essay Checker</h1>
-
-<label>Essay mövzusu:</label>
-<input id="topic" placeholder="Mövzunu yazın">
-
-<label>Esse:</label>
-<textarea id="essay" placeholder="Esseni buraya yazın..."></textarea>
-
-<br><br>
-
-<button onclick="checkEssay()">ESSENİ YOXLAT</button>
-
-<div id="result" class="result"></div>
-
-</div>
-
-<script>
-
-function checkEssay(){
-
-const essay=document.getElementById("essay").value.trim();
-const topic=document.getElementById("topic").value.trim();
-const result=document.getElementById("result");
-
-if(!essay){
-result.innerHTML='<p class="error">Zəhmət olmasa esse yazın.</p>';
-return;
+.box{
+  margin-top:15px;
+  padding:17px;
+  border-radius:14px;
+  background:#f8fafc;
 }
-
-const words=essay.split(/\s+/).filter(Boolean);
-const wordCount=words.length;
-
-const text=essay.toLowerCase();
-
-let grammar=5;
-let vocabulary=5;
-let structure=5;
-let topicScore=5;
-
-let grammarMistakes=[];
-let suggestions=[];
-
-/* Sadə grammar yoxlaması */
-
-const grammarRules=[
-["i is","I am"],
-["he are","he is"],
-["she are","she is"],
-["they is","they are"],
-["we is","we are"],
-["you is","you are"],
-["he have","he has"],
-["she have","she has"],
-["did went","did go"],
-["did saw","did see"],
-["more better","better"],
-["people is","people are"],
-["children is","children are"]
-];
-
-grammarRules.forEach(function(item){
-
-if(text.includes(item[0])){
-grammar--;
-grammarMistakes.push(
-item[0]+" → "+item[1]
-);
+.box h3{
+  margin-top:0;
+  color:#4f46e5;
 }
-
-});
-
-grammar=Math.max(0,grammar);
-
-/* Vocabulary */
-
-const repeatedWords={};
-
-words.forEach(function(word){
-
-const w=word.toLowerCase().replace(/[^a-z']/g,"");
-
-if(w.length>3){
-repeatedWords[w]=(repeatedWords[w]||0)+1;
-}
-
-});
-
-let repeated=[];
-
-for(let word in repeatedWords){
-
-if(repeatedWords[word]>=4){
-repeated.push(word);
-}
-
-}
-
-if(repeated.length>0){
-vocabulary-=Math.min(2,repeated.length);
-suggestions.push(
-"Bu sözləri çox təkrar etməməyə çalış: "+
-repeated.join(", ")
-);
-}
-
-vocabulary=Math.max(0,vocabulary);
-
-/* Structure */
-
-const sentences=essay
-.split(/[.!?]+/)
-.filter(function(x){return x.trim().length>0;});
-
-if(sentences.length<4){
-structure-=2;
-}
-
-if(wordCount<80){
-structure-=1;
-}
-
-if(wordCount<100){
-structure-=1;
-}
-
-structure=Math.max(0,structure);
-
-/* Topic */
-
-if(topic){
-
-const topicWords=topic
-.toLowerCase()
-.split(/\s+/)
-.filter(function(x){return x.length>3;});
-
-let found=0;
-
-topicWords.forEach(function(word){
-
-if(text.includes(word)){
-found++;
-}
-
-});
-
-if(topicWords.length>0){
-
-const ratio=found/topicWords.length;
-
-if(ratio<0.2){
-topicScore=2;
-}else if(ratio<0.4){
-topicScore=3;
-}else if(ratio<0.6){
-topicScore=4;
-}
-
-}
-
-}
-
-/* Nəticə */
-
-const raw=
-grammar+
-vocabulary+
-structure+
-topicScore;
-
-const finalScore=(raw/20)*16.70;
-
-let comment="";
-
-if(finalScore>=14){
-comment="Çox yaxşı nəticə. Əsasən yaxşı yazılıb.";
-}
-else if(finalScore>=11){
-comment="Yaxşıdır, amma bəzi səhvlər üzərində işləmək lazımdır.";
-}
-else if(finalScore>=8){
-comment="Orta nəticədir. Grammar və Vocabulary üzərində daha çox işləmək lazımdır.";
-}
-else{
-comment="Esse üzərində daha çox işləmək lazımdır.";
-}
-
-/* Ekrana çıxar */
-
-let html="";
-
-html+=
-'<div class="card score">'+
-finalScore.toFixed(2)+
-' / 16.70</div>';
-
-html+=
-'<div class="card"><b>Söz sayı:</b> '+
-wordCount+
-'</div>';
-
-html+=
-'<div class="card"><b>Mövzu:</b> '+
-topicScore+
-' / 5</div>';
-
-html+=
-'<div class="card"><b>Grammar:</b> '+
-grammar+
-' / 5</div>';
-
-html+=
-'<div class="card"><b>Vocabulary:</b> '+
-vocabulary+
-' / 5</div>';
-
-html+=
-'<div class="card"><b>Structure:</b> '+
-structure+
-' / 5</div>';
-
-html+=
-'<div class="card"><b>Müəllim rəyi:</b><br>'+
-comment+
-'</div>';
-
-if(grammarMistakes.length){
-
-html+=
-'<div class="card"><b>Grammar səhvləri:</b><br>'+
-grammarMistakes.join("<br>")+
-'</div>';
-
-}else{
-
-html+=
-'<div class="card"><b>Grammar:</b><br>'+
-"Aşkar edilən əsas grammar səhvi yoxdur."+
-'</div>';
-
-}
-
-if(suggestions.length){
-
-html+=
-'<div class="card"><b>Vocabulary tövsiyəsi:</b><br>'+
-suggestions.join("<br>")+
-'</div>';
-
-}
-
-result.innerHTML=html;
-
-}
-
-</script>
-
-</body>
-    </html>
+.good{color:#087443}
+.bad{color:#b423
